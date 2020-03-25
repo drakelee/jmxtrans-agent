@@ -101,11 +101,21 @@ public class InfluxMetric {
             return value.toString() + "i";
         }
         if (value instanceof Float || value instanceof Double || value instanceof BigDecimal) {
+            if (value instanceof Double && ((Double) value).isNaN()) {
+                return NUMBER_FORMAT.format(-1.0d);
+            } else if (value instanceof Float && ((Float) value).isNaN()) {
+                return NUMBER_FORMAT.format(-1.0f);
+            }
+
             synchronized (NUMBER_FORMAT) {
                 return NUMBER_FORMAT.format(value);
             }
         }
+
         String s = value.toString();
+        if (s.charAt(0) != '"' && s.charAt(s.length() - 1) != '"') {
+            s = "\"" + s + "\"";
+        }
         return "\""+ s.replace("\\", "\\\\").replace("\"","\\\"") +"\"";
     }
 
